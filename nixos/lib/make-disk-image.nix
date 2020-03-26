@@ -61,6 +61,8 @@
 
 , # Disk image format, one of qcow2, qcow2-compressed, vdi, vpc, raw.
   format ? "raw"
+, # The nixpkgs to include as the channel, or null for no channel
+  channelNixpkgs ? pkgs.lib.cleanSource pkgs.path
 }:
 
 assert partitionTableType == "legacy" || partitionTableType == "legacy+gpt" || partitionTableType == "efi" || partitionTableType == "hybrid" || partitionTableType == "none";
@@ -129,12 +131,10 @@ let format' = format; in let
     none = "";
   }.${partitionTableType};
 
-  nixpkgs = cleanSource pkgs.path;
-
   # FIXME: merge with channel.nix / make-channel.nix.
   channelSources = pkgs.runCommand "nixos-${config.system.nixos.version}" {} ''
     mkdir -p $out
-    cp -prd ${nixpkgs.outPath} $out/nixos
+    cp -prd ${channelNixpkgs.outPath} $out/nixos
     chmod -R u+w $out/nixos
     if [ ! -e $out/nixos/nixpkgs ]; then
       ln -s . $out/nixos/nixpkgs
@@ -163,7 +163,7 @@ let format' = format; in let
   users   = map (x: x.user  or "''") contents;
   groups  = map (x: x.group or "''") contents;
 
-  closureInfo = pkgs.closureInfo { rootPaths = [ config.system.build.toplevel channelSources ]; };
+  closureInfo = pkgs.closureInfo { rootPaths = [ config.system.build.toplevel ] ++ optional (channelNixpkgs != null) channelSources; };
 
   blockSize = toString (4 * 1024); # ext4fs block size (not block device sector size)
 
@@ -251,7 +251,7 @@ let format' = format; in let
     chmod 755 "$TMPDIR"
     echo "running nixos-install..."
     nixos-install --root $root --no-bootloader --no-root-passwd \
-      --system ${config.system.build.toplevel} --channel ${channelSources} --substituters ""
+      --system ${config.system.build.toplevel} ${optionalString (channelNixpkgs != null) "--channel ${channelSources}"} --substituters ""
 
     diskImage=nixos.raw
 

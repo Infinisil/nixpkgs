@@ -40,6 +40,17 @@ in
         Digital Ocean account.
       '';
     };
+
+    virtualisation.digitalOceanImage.channelNixpkgs = mkOption {
+      type = types.nullOr types.path;
+      default = cleanSource pkgs.path;
+      example = "bzip2";
+      description = ''
+        Disk image compression method. Choose bzip2 to generate smaller images that
+        take longer to generate but will consume less metered storage space on your
+        Digital Ocean account.
+      '';
+    };
   };
 
   #### implementation
@@ -59,7 +70,7 @@ in
       configFile = if cfg.configFile == null
         then config.virtualisation.digitalOcean.defaultConfigFile
         else cfg.configFile;
-      inherit (cfg) diskSize;
+      inherit (cfg) diskSize channelNixpkgs;
       inherit config lib pkgs;
     };
 
