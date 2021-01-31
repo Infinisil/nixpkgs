@@ -61,6 +61,15 @@ in
           Group to use when running Syncplay.
         '';
       };
+
+      passwordFile = mkOption {
+        type = types.nullOr types.path;
+        default = null;
+        description = ''
+          Path to the file that contains the server password. If null,
+          the server doesn't require a password.
+        '';
+      };
     };
   };
 
@@ -71,10 +80,19 @@ in
       after       = [ "network-online.target "];
 
       serviceConfig = {
-        ExecStart = "${pkgs.syncplay}/bin/syncplay-server ${escapeShellArgs cmdArgs}";
         User = cfg.user;
         Group = cfg.group;
       };
+
+      script = ''
+        ${if cfg.passwordFile == null then ''
+          passwordArg=""
+        '' else ''
+          password=$(cat ${cfg.passwordFile})
+          passwordArg="--password $password"
+        ''}
+        ${pkgs.syncplay}/bin/syncplay-server ${escapeShellArgs cmdArgs} $passwordArg
+      '';
     };
   };
 }
