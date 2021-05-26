@@ -27,6 +27,7 @@ in
     environment.variables = {
       GTK_IM_MODULE = "uim";
       QT_IM_MODULE  = "uim";
+      GLFW_IM_MODULE = "uim";
       XMODIFIERS    = "@im=uim";
     };
     services.xserver.displayManager.sessionCommands = ''

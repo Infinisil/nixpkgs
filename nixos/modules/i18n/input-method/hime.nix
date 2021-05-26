@@ -7,6 +7,7 @@ with lib;
     environment.variables = {
       GTK_IM_MODULE = "hime";
       QT_IM_MODULE  = "hime";
+      GLFW_IM_MODULE = "hime";
       XMODIFIERS    = "@im=hime";
     };
     services.xserver.displayManager.sessionCommands = "${pkgs.hime}/bin/hime &";

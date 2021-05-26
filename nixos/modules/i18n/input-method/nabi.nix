@@ -8,6 +8,7 @@ with lib;
     environment.variables = {
       GTK_IM_MODULE = "nabi";
       QT_IM_MODULE  = "nabi";
+      GLFW_IM_MODULE = "nabi";
       XMODIFIERS    = "@im=nabi";
     };
 
